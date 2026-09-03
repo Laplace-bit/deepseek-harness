@@ -17,6 +17,15 @@ import css from './ChatView.module.css'
 
 const FOLLOW_THRESHOLD = 24
 
+/**
+ * A third-party renderer can take over programmatic bottom-follow by claiming
+ * the scrollport. This only silences ChatView's *automatic* follow; an explicit
+ * jump-to-bottom still writes and the owner sees the external handoff.
+ */
+function hasExternalScrollOwner(scrollport: HTMLElement): boolean {
+  return scrollport.hasAttribute('data-follow-owned')
+}
+
 /** Active column host when present; otherwise the view-local scroller. */
 function scrollerOf(from: HTMLElement): HTMLElement {
   return (from.closest('[data-conversation-scroll]')) ?? from
@@ -543,6 +552,10 @@ export function ChatView({
       ? floor - el.scrollTop <= FOLLOW_THRESHOLD + 1
       : atBottomRef.current
     if (!movedByReader && isAtBottom) {
+      if (hasExternalScrollOwner(el)) {
+        observedTopRef.current = el.scrollTop
+        return
+      }
       toBottom(el)
       return
     }
@@ -584,6 +597,7 @@ export function ChatView({
     const local = listRef.current
     if (local !== null && atBottomRef.current) {
       const el = scrollerOf(local)
+      if (hasExternalScrollOwner(el)) return
       el.scrollTop = el.scrollHeight
       observedTopRef.current = el.scrollTop
       chatScroll.save(null)

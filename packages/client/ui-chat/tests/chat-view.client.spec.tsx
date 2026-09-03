@@ -2332,6 +2332,31 @@ describe('ChatView', () => {
     expect(observe).toHaveBeenCalledTimes(1)
   })
 
+  it('suppresses automatic follow while an external scroll owner claims the port', () => {
+    let notify: (() => void) | undefined
+    class ResizeObserverStub {
+      constructor(callback: ResizeObserverCallback) {
+        notify = () => { callback([], this as unknown as ResizeObserver) }
+      }
+
+      observe = vi.fn()
+      disconnect = vi.fn()
+    }
+    vi.stubGlobal('ResizeObserver', ResizeObserverStub)
+    const h = makeHarness({ nodes: [user(1, 'q'), assistant(2, 'a')] })
+    const view = render(<h.ChatView {...h.props} />)
+    const scroller = view.container.querySelector('[class*="scroll"]') as HTMLDivElement
+    Object.defineProperty(scroller, 'scrollHeight', { value: 1_000, writable: true })
+    Object.defineProperty(scroller, 'clientHeight', { value: 300, writable: true })
+    scroller.scrollTop = 700
+    fireEvent.scroll(scroller)
+    scroller.setAttribute('data-follow-owned', 'active')
+
+    Object.defineProperty(scroller, 'scrollHeight', { value: 1_200, writable: true })
+    act(() => { notify?.() })
+    expect(scroller.scrollTop).toBe(700)
+  })
+
   it('pinned dynamic-height updates select the latest Turn without reading row geometry', () => {
     let notify: (() => void) | undefined
     let nextFrame = 0
