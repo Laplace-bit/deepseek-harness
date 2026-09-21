@@ -1,0 +1,39 @@
+# SPPM web profile overlay. Apply after Harness's shipped web-app bundle.
+# The server always supplies this fixed file; a request cannot choose another
+# profile or patch.
+
+- insert:
+    - id: sppm-page-actions
+      name: '@deepseek-ai/dsh-sppm-harness-plugin'
+
+# SPPM embeds Harness in a browser while the Harness process runs on the
+# gateway host. The upstream `-auto` row would select the macOS/Windows native
+# chooser when the development host has a display; that dialog belongs to the
+# gateway host and cannot be driven by the remote browser. Pin the browser
+# picker for every SPPM deployment instead.
+- id: directory-picker
+  disabled: true
+- insert:
+    - id: directory-picker-browse
+      name: '@deepseek-ai/dsh-host-directory-picker-browse'
+    - id: ui-directory-picker-browse
+      name: '@deepseek-ai/dsh-client-ui-directory-picker-browse'
+
+# The SPPM trial exposes attachments and browser page capabilities only.
+# These rows remain in the upstream web graph for compatibility but are
+# disabled explicitly so terminal and server-file operations cannot reappear
+# when the upstream composition changes.
+- id: tool-bash
+  disabled: true
+
+- id: tool-pwsh
+  disabled: true
+
+- id: tool-fs
+  disabled: true
+
+- id: tool-fs-search
+  disabled: true
+
+- id: tool-jobs
+  disabled: true

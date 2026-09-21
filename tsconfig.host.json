@@ -172,6 +172,10 @@
     "apps/desktop/scripts/**/*.ts",
     "apps/desktop/tests/**/*.ts",
     "apps/desktop-host/tests/**/*.ts",
+    // SPPM host-face packages; ui-embed belongs to the Client aggregate.
+    "packages/sppm/gateway/src/**/*.ts",
+    "packages/sppm/page-bridge/src/**/*.ts",
+    "packages/sppm/harness-plugin/src/**/*.ts",
     "benchmarks/**/*.ts",
     "packages/*/*/tests/**/*.ts",
     "scripts/**/*.ts",

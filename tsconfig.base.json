@@ -304,6 +304,10 @@
       "@deepseek-ai/dsh-client-ui-directory-picker-browse": ["./packages/client/ui-directory-picker-browse/src"],
       "@deepseek-ai/dsh-client-ui-directory-picker-native": ["./packages/client/ui-directory-picker-native/src"],
       "@deepseek-ai/dsh-client-ui-open-in-app": ["./packages/client/ui-open-in-app/src"],
+      "@deepseek-ai/dsh-sppm-gateway": ["./packages/sppm/gateway/src"],
+      "@deepseek-ai/dsh-sppm-harness-plugin": ["./packages/sppm/harness-plugin/src"],
+      "@deepseek-ai/dsh-sppm-page-bridge": ["./packages/sppm/page-bridge/src"],
+      "@deepseek-ai/dsh-sppm-ui-embed": ["./packages/sppm/ui-embed/src"],
       // sdk/ folders are role-named without their npm-side sdk/jsonrpc prefixes,
       // so their names do not match their directories and the generated aliases
       // below cannot map them; these three stay hand-written.

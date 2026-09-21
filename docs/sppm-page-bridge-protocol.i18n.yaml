@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/sppm-page-bridge-protocol.md
+sppm-page-bridge-protocol.md: 77eecdab99b912837de32b4729b66f19bfeea96a
+sppm-page-bridge-protocol.zh.md: c89ad5d95578f1751b93f3457333d5c06e451ed2
