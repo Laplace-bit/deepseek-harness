@@ -125,6 +125,7 @@ export const SERVICE_PAGE: Record<string, string> = {
   jobController: 'jobs.md',
   sessionTelemetry: 'session-telemetry.md',
   agentTeams: 'agent-team.md',
+  sppmPageActions: 'tools.md',
   tokenMeter: 'token-meter.md',
   toolResultPruner: 'compaction.md',
   tools: 'tools.md',
@@ -827,6 +828,8 @@ export const FOUNDATION_TYPE_NAMES: ReadonlySet<string> = new Set([
 
 /** Project types deliberately documented outside the subsystems catalog. */
 export const TYPE_LINK_EXEMPTIONS: Readonly<Record<string, string>> = {
+  PageActionReceipt: 'SPPM wire receipt contract is owned by docs/sppm-page-bridge-protocol.md',
+  PageActionRequest: 'SPPM wire request contract is owned by docs/sppm-page-bridge-protocol.md',
   ConnectionFetchHandler: 'shared Fetch dispatch is owned by packages/client/connection/src/rpc.ts',
   ConnectionRequestRejection: 'transport rejection status is owned by packages/client/connection/src/rpc.ts',
   ConnectionTrustRequest: 'transport authentication input is owned by packages/client/connection/src/rpc.ts',

@@ -626,6 +626,18 @@ describe('auditStartupEntries', () => {
     ].join('\n'))
   })
 
+  it('fails startup when the Typert loader is inactive', async () => {
+    const warn = vi.fn()
+    const error = new Error('Typert contract registration failed')
+    const result = auditStartupEntries(ctxWith([{
+      fiber: fiber(3, error),
+      options: { id: 'typert-loader', name: '@deepseek-ai/dsh-typert-loader' },
+    }]), NAME, warn)
+
+    await expect(result).rejects.toThrow('typert-loader (required)')
+    expect(warn).not.toHaveBeenCalled()
+  })
+
   it.each([
     { id: 'tool-todo', required: false },
     { id: 'webserver', required: true },

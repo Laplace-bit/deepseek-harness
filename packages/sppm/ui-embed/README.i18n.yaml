@@ -1,6 +1,28 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/sppm/ui-embed/README.md
-README.md: ad71ac431320b0c42c82bc1296b95b98aebca392
-README.zh.md: 776fd64d734f8d0344ea683c50768530315639a3
+/:
+  en: 2e90851de6261333
+  zh: 0253d15894e9cdfe
+/sppm-harness-ui-embed:
+  en: b86031fe438ae0bc
+  zh: 071a55f1057c9131
+/sppm-harness-ui-embed/summary:
+  en: a6d20aa08eb151ae
+  zh: 7c1672f88fc5c11e
+/sppm-harness-ui-embed/table-of-contents:
+  en: 4c7168ff6549e3b1
+  zh: 277d04b66f2a744c
+/sppm-harness-ui-embed/model-experience:
+  en: b8cbae005f6359e5
+  zh: 94411a4a34c81169
+/sppm-harness-ui-embed/model-experience/kv-cache-effect:
+  en: 1cf66c7d38d86872
+  zh: 773a83e4f8390771
+/sppm-harness-ui-embed/known-limitations-and-deferred-work:
+  en: 1370e711f6e11046
+  zh: f391b2b5e9cdc7f0
+/sppm-harness-ui-embed/known-limitations-and-deferred-work/dev-note:
+  en: 4d5ee7e3b5b8787a
+  zh: aa767901f2de768f

@@ -2721,6 +2721,25 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'sppmPageActions',
+    summary: 'Cordis service exposed to SPPM tools; it has no arbitrary script surface.',
+    description: 'Cordis service exposed to SPPM tools; it has no arbitrary script surface.',
+    methods: [
+      {
+        signature: 'execute(request: PageActionRequest): Promise<PageActionReceipt>',
+        description: 'Run one page action in the browser.',
+        parameters: [{ name: 'request', description: 'page-bound action command.' }],
+        returns: 'the browser receipt.',
+      },
+      {
+        signature: 'resolveContext(request: { browserInstanceId?: string }): Promise<PageActionReceipt>',
+        description: 'Read the page context of the active browser instance.',
+        parameters: [{ name: 'request', description: 'optional browser instance to pin resolution to.' }],
+        returns: 'a receipt whose `data.context` is the resolved page context.',
+      },
+    ],
+  },
+  {
     key: 'ssh',
     summary: 'One non-reconnecting SSH session; loss invalidates all active operations.',
     description: 'One non-reconnecting SSH session; loss invalidates all active operations.',
@@ -5804,6 +5823,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'PackageResult',
     declaration: 'export interface PackageResult {\n    exitCode: number;\n    output: string;\n    truncated: boolean;\n    logPath: string;\n    kind?: PluginInstallFailureKind;\n    timedOut?: boolean;\n    incompatible?: IncompatiblePlugin[];\n}',
+  },
+  {
+    name: 'PageActionName',
+    declaration: 'export type PageActionName = typeof SPPM_PAGE_BRIDGE_ACTIONS[number];',
+  },
+  {
+    name: 'PageActionReceipt',
+    declaration: 'export interface PageActionReceipt {\n    commandId: string;\n    state: PageActionReceiptState;\n    contextVersion: number;\n    message?: string;\n    data?: Record<string, unknown>;\n    issues?: Array<{\n        code: string;\n        field?: string;\n        message: string;\n        suggestion?: string;\n    }>;\n    nextAction?: string;\n}',
+  },
+  {
+    name: 'PageActionReceiptState',
+    declaration: 'export type PageActionReceiptState = \'succeeded\' | \'failed\' | \'waiting_user\' | \'cancelled\' | \'expired\';',
+  },
+  {
+    name: 'PageActionRequest',
+    declaration: 'export interface PageActionRequest {\n    commandId: string;\n    userId: string;\n    sessionId: string;\n    browserInstanceId: string;\n    targetPageId: string;\n    contextVersion: number;\n    action: PageActionName;\n    args: Record<string, unknown>;\n    issuedAt: number;\n    expiresAt: number;\n}',
   },
   {
     name: 'PeerAdmission',

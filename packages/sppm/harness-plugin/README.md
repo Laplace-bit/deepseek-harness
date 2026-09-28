@@ -13,12 +13,11 @@ English | [中文](README.zh.md)
 
 This plugin is the model-facing SPPM capability boundary. It publishes business-shaped tools, resolves the active browser context, transports typed page actions, and preserves structured waiting, failure, and verified-save receipts.
 
-## Model Experience
-
-When a user asks to create a process card, the built-in `sppm-process-card-create` skill gives the model a staged procedure: discover a permitted route, fill and confirm the header, wait for a verified object id, then open the parameter editor and reconcile every value with the live module directory. The model receives actionable field-level issues and must ask about missing or ambiguous values instead of guessing.
+**Runtime invariant:** No invariant companion is published because the plugin exposes no package-owned invariant state.
 
 ## Table of Contents
 
+- [Model Experience](#model-experience)
 - [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
 - [Dev Note](#dev-note)
 
@@ -32,11 +31,27 @@ When a user asks to create a process card, the built-in `sppm-process-card-creat
 
 The plugin package ships the source bundle `skills/sppm-process-card-create/SKILL.md`. The SPPM gateway installs that file idempotently into each user's Harness `${DSH_HOME}/skills` before starting the child process. SPPM's standard agent preset mounts Harness's native `skill-filesystem` and `tool-skill` rows, so the file is discovered, frontmatter-validated, watched, listed in the normal skill catalog, and loaded through the same `skill` tool as every other Harness skill. The plugin does not register a provider on `ctx.skills`, inject instructions at `agent/pre-step`, or use a semantic keyword loader. The skill separates header entry (`process-card-header`) from parameter maintenance: after the header is confirmed and read back with an object id, Harness opens `editCardParameters`, reads the `process-card-parameters` form, and fills the complete `moduleDtoList` by module, stage, parameter, unit, standard/limits, setting/actual values, device menu, and two reference-image indices. Files and images are evidence that must be reconciled against the live directory; unknown or ambiguous values are collected from the user. Neither phase is reported complete without confirmation and a `verified=true` readback.
 
+## Model Experience
+
+### SPPM page-action calls
+
+#### What the model sees
+
+The plugin exposes `sppm_readPageContext`, `sppm_searchRoutes`, and the other registered actions. Results contain the active page context, route matches, business records, validation issues, or page receipts. `readBusinessContext` returns summaries and field directories by default; set `includeDraft=true` only when a complete draft is needed for filling or validation.
+
+#### Token effect
+
+Each selected action contributes its tool definition and each call contributes its result. Route and record limits bound list responses; `includeDraft` controls whether the full form data enters the result.
+
+#### KV Cache effect
+
+Action receipts append to the current transcript after its existing prefix. Updated page data changes new result tokens without replacing earlier messages; changes to the plugin's tool definitions can change request schemas.
+
 ## Known Limitations and Deferred Work
 
-Material parsing remains outside this page-action package. Template context, record queries, draft validation, and submission are page actions so the Web application remains the owner of credentials, permissions, form rules, and business request shapes. Submission always uses the Web form's own confirmation and save flow.
 - Parameter entry remains dependent on the active page's menus, field definitions, and existing Web APIs; the plugin does not provide a server-side transaction or idempotency ledger.
+- Material parsing remains outside this page-action package. Template context, record queries, draft validation, and submission are page actions so the Web application remains the owner of credentials, permissions, form rules, and business request shapes. Submission always uses the Web form's own confirmation and save flow.
 
-## Dev Note
+### Dev Note
 
 This Dev Note is working context for maintainers. The plugin does not own business credentials or bypass page permissions; it can only call capabilities advertised by the active Vue adapter.

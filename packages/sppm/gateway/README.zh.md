@@ -13,11 +13,14 @@ kind: "package-reference"
 
 网关是 Vue 页面桥接与每用户 Harness 进程之间的认证边界。它解析当前浏览器页面供发现，转发类型化页面动作，约束会话和浏览器绑定，并让模型供应商流量留在 Harness 内部。
 
+**运行时不变量：** 本包没有发布不变量伴随模块，因为网关不暴露由本包拥有的不变量状态。
+
 ## 目录
 
 - [本地启动](#local-startup)
 - [嵌入主站时的反向代理](#reverse-proxy-requirements-for-embedding)
 - [Web 部署与工作区](#deployment-and-workspace-placement)
+- [模型体验](#model-experience)
 - [已知限制与后续工作](#known-limitations-and-deferred-work)
 - [开发备注](#dev-note)
 
@@ -28,7 +31,18 @@ kind: "package-reference"
 <a id="local-startup"></a>
 ## 本地启动
 
-安装依赖并启动 Java 和 Vue 后，在仓库根目录执行 `./start-sppm.sh`。前台网关使用 `apps/cli/src/bin.ts`，监听回环地址的 3180 端口，并从相邻 frontend 的 `proxy.config.json` 中读取 target，派生 `/getInfo` 地址。监听日志只代表网关启动成功，不代表已认证的 Harness 就绪；需要在已登录的 Vue 页面打开助手验证后者。
+安装依赖后，首次启动前需要先重新生成 alpha2 的 Host/Client 产物：
+
+```sh
+pnpm install
+pnpm run build
+```
+
+全新 checkout 必须执行这一步，因为 Typert loader 会加载生成的 `lib` 文件。随后启动 Java 和 Vue，在仓库根目录执行 `./start-sppm.sh`。前台网关使用 `apps/cli/src/bin.ts`，监听回环地址的 3180 端口，并从相邻 frontend 的 `proxy.config.json` 中读取 target，派生 `/getInfo` 地址。监听日志只代表网关启动成功，不代表已认证的 Harness 就绪；需要在已登录的 Vue 页面打开助手验证后者。如果 Typert loader 无法注册契约，启动现在会直接报告 loader 错误，而不会继续启动一个会把目录选择器定义撤回错误暴露出来的半可用网关。
+
+开发时不要只刷新 Host 阶段却继续复用旧的浏览器 bundle：聚合包 `api-remotes` 的 Client 产物也必须基于同一批 Host 契约重新生成。推荐使用 `pnpm run build` 按顺序完整构建；如果只做契约重建，则执行 `pnpm run build:lib:host`，然后执行 `pnpm --filter @deepseek-ai/dsh-api-remotes bundle`。
+
+打开嵌入式助手前，执行 `pnpm run bundle:sppm-assistant` 重新构建并同步 Vue 宿主的静态资源。`start-sppm.sh` 启动前会再次同步；如果任一侧资源过期，启动会先失败，不会继续提供网关。
 
 可选 dotenv 配置保存在 `.data/sppm.env`，已导出的 `SPPM_*` 环境变量优先。本地 Cookie 密钥保存在 `.data/sppm-local/cookie-secret` 并重复使用。启动器只接受回环地址，为本地 HTTP 默认关闭 Secure Cookie，并拒绝 `NODE_ENV=production`。Ctrl+C 请求关闭本网关及其拥有的 Harness 子进程。端口被占用时报错，不会停止其他进程。RuoYi `/getInfo` 需要业务码 200、`user.userId` 和顶层 `roles`；仅 HTTP 200 不代表认证成功。
 
@@ -66,10 +80,20 @@ Web profile 固定使用浏览器内目录选择器。选择器显示的是运�
 
 macOS 或 Windows 原生目录对话框只适用于 Agent 与用户在同一台电脑上的桌面部署。嵌入主站的远程浏览器不能访问用户电脑本地路径；需要该能力时应提供独立桌面 Connector，而不是让 Web Agent 直接读取本地文件。
 
+<a id="model-experience"></a>
+## 模型体验
+
+间接地，通过 SPPM Harness 插件的页面动作调用。
+
+#### KV Cache 效果
+
+网关将页面动作回执转发为工具结果；新的页面数据追加到已有对话前缀之后，不会改写更早的消息。
+
 <a id="known-limitations-and-deferred-work"></a>
 ## 已知限制与后续工作
 
-空闲进程回收和网关会话持久化属于部署后续工作。网关重启后的模型配置恢复遵循 Harness 自身的 profile 与凭据持久化，不需要 Java 或网关交接、改写或镜像模型设置。
+- 网关不会回收空闲的用户 Harness 进程，浏览器会话只保存在内存中；网关重启会结束这些会话。
+- 模型配置恢复遵循 Harness 自身的 profile 与凭据持久化；Java 和网关不负责恢复、转换或镜像这些设置。
 
 <a id="dev-note"></a>
 ### 开发备注

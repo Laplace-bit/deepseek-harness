@@ -4,12 +4,14 @@ import type { Server } from 'node:http'
 import type { WebSocketServer as WsWebSocketServer } from 'ws'
 import { isPageActionReceipt, isPageActionRequest, SPPM_PAGE_BRIDGE_ACTIONS, SPPM_PAGE_BRIDGE_PROTOCOL_VERSION } from '@deepseek-ai/dsh-sppm-page-bridge'
 
+/** Authenticated SPPM user identity used to select a Harness instance. */
 export interface SppmPrincipal {
   userId: string
   displayName?: string
   roles: string[]
 }
 
+/** One fixed-profile Harness process and its gateway-owned credentials. */
 export interface ManagedHarnessInstance {
   userId: string
   instanceId: string
@@ -21,8 +23,10 @@ export interface ManagedHarnessInstance {
   stop(): Promise<void>
 }
 
+/** Creates a fixed-profile Harness process for an authenticated user. */
 export type HarnessInstanceFactory = (principal: SppmPrincipal) => Promise<ManagedHarnessInstance>
 
+/** Indicates that the gateway already owns its maximum number of instances. */
 export class InstanceCapacityError extends Error {
   constructor(public readonly limit: number) {
     super(`AI 实例容量已满（上限 ${limit}）`)
@@ -36,6 +40,12 @@ export class HarnessInstanceManager {
 
   constructor(private readonly maxInstances: number, private readonly factory: HarnessInstanceFactory) {}
 
+  /**
+   * Return or create the fixed-profile process assigned to a user.
+   * @param principal Authenticated SPPM identity.
+   * @returns The existing or newly started Harness instance.
+   * @throws {InstanceCapacityError} when the configured instance limit is full.
+   */
   async acquire(principal: SppmPrincipal): Promise<ManagedHarnessInstance> {
     const existing = this.instances.get(principal.userId)
     if (existing !== undefined) return existing
@@ -45,6 +55,11 @@ export class HarnessInstanceManager {
     return instance
   }
 
+  /**
+   * Stop and remove a user's managed process when it is active.
+   * @param userId Authenticated SPPM user id.
+   * @returns Completion after the process stop request settles.
+   */
   async release(userId: string): Promise<void> {
     const instance = this.instances.get(userId)
     if (instance === undefined) return
@@ -52,14 +67,24 @@ export class HarnessInstanceManager {
     await instance.stop()
   }
 
+  /**
+   * Return the number of active managed Harness processes.
+   * @returns The number of active instances.
+   */
   size(): number { return this.instances.size }
 
+  /**
+   * Find the process associated with a gateway-internal token.
+   * @param token Gateway-internal instance token.
+   * @returns The matching instance, or undefined when no token matches.
+   */
   findByInternalToken(token: string): ManagedHarnessInstance | undefined {
     for (const instance of this.instances.values()) if (instance.internalToken === token) return instance
     return undefined
   }
 }
 
+/** Network, authentication, and instance settings for the SPPM gateway. */
 export interface GatewayConfig {
   host?: string
   port?: number
@@ -172,6 +197,10 @@ export class SppmGateway {
     this.server.on('upgrade', (request, socket, head) => { void this.handleUpgrade(request, socket, head) })
   }
 
+  /**
+   * Start listening on the configured host and port.
+   * @returns The listening HTTP server after the socket accepts connections.
+   */
   listen(): Promise<Server> {
     const host = this.config.host ?? '127.0.0.1'
     const port = this.config.port ?? 3180
@@ -184,10 +213,19 @@ export class SppmGateway {
     })
   }
 
+  /**
+   * Stop active Harness instances and close the gateway server.
+   * @returns Completion after the owned server has closed.
+   */
   async close(): Promise<void> {
     for (const session of this.sessions.values()) await this.config.instances.release(session.userId)
     this.sessions.clear()
-    await new Promise<void>((resolve, reject) => this.server.close(error => error === undefined ? resolve() : reject(error)))
+    await new Promise<void>((resolve, reject) => {
+      this.server.close((error) => {
+        if (error === undefined) resolve()
+        else reject(error)
+      })
+    })
     this.websocketServer?.close()
   }
 
@@ -376,7 +414,7 @@ export class SppmGateway {
         // permessage-deflate between the browser and the private Harness
         // child.  Sending uncompressed frames avoids RSV1 mismatches after a
         // proxy or ingress strips the extension response header.
-        this.websocketServer ??= new WebSocketServer({ noServer: true, perMessageDeflate: false } as unknown as { noServer: boolean })
+        this.websocketServer ??= new WebSocketServer({ noServer: true, perMessageDeflate: false })
         this.websocketServer.handleUpgrade(request, socket, head, (client) => {
           const byBrowser = this.pageBridges.get(session.userId) ?? new Map<string, Set<import('ws').WebSocket>>()
           const bridges = byBrowser.get(browserInstanceId) ?? new Set<import('ws').WebSocket>()
@@ -392,12 +430,12 @@ export class SppmGateway {
         return
       }
       const instance = await this.config.instances.acquire(session.principal)
-      this.websocketServer ??= new WebSocketServer({ noServer: true, perMessageDeflate: false } as unknown as { noServer: boolean })
+      this.websocketServer ??= new WebSocketServer({ noServer: true, perMessageDeflate: false })
       this.websocketServer.handleUpgrade(request, socket, head, (client) => {
         const upstream = new WebSocket(`${instance.endpoint.replace(/^http/, 'ws')}${harnessPath}${url.search}`, {
           perMessageDeflate: false,
           headers: { cookie: instance.harnessCookie },
-        } as unknown as { headers?: Record<string, string> })
+        })
         // `ws` delivers the payload as a Buffer for both text and binary
         // frames.  Preserve the `isBinary` bit across the two hops: the
         // Harness mux deliberately rejects binary control messages, and
@@ -412,14 +450,14 @@ export class SppmGateway {
           client.send(isBinary ? data : data.toString('utf8'))
         }) as unknown as (data: Buffer) => void)
         client.on('close', () => { if (upstream.readyState === WebSocket.OPEN) upstream.close() })
-        upstream.on('close', (function () {
+        upstream.on('close', function () {
           if (client.readyState === WebSocket.OPEN) client.close()
-        }) as unknown as () => void)
-        upstream.on('error', (function () {
+        })
+        upstream.on('error', function () {
           console.error('sppm-gateway: Harness WebSocket unavailable')
           if (client.readyState === WebSocket.OPEN) client.close(1011, 'harness unavailable')
           else client.close()
-        }) as unknown as () => void)
+        })
       })
     } catch (error) {
       console.error('sppm-gateway: Harness upgrade unavailable', error instanceof Error ? error.message : String(error))
@@ -438,7 +476,7 @@ export class SppmGateway {
       if (!isPageActionRequest(body)) {
         json(response, 400, { error: 'invalid_command', message: '页面指令格式无效' }); return
       }
-      if (body.userId !== undefined && body.userId !== instance.userId && body.userId !== 'unknown') {
+      if (body.userId !== instance.userId && body.userId !== 'unknown') {
         json(response, 403, { error: 'user_mismatch' }); return
       }
       const { browserInstanceId, commandId } = body
@@ -536,7 +574,12 @@ export class SppmGateway {
       }
       const onMessage = (raw: import('ws').RawData): void => {
         try {
-          const value = JSON.parse(raw.toString()) as unknown
+          const text = Buffer.isBuffer(raw)
+            ? raw.toString('utf8')
+            : raw instanceof ArrayBuffer
+              ? Buffer.from(raw).toString('utf8')
+              : Buffer.concat(raw).toString('utf8')
+          const value = JSON.parse(text) as unknown
           if (!isPageActionReceipt(value) || value.commandId !== payload.commandId) {
             if (isPageActionReceipt(value) && value.commandId !== payload.commandId) return
             cleanup()
@@ -632,7 +675,7 @@ export class SppmGateway {
 }
 
 async function readRequestBody(request: IncomingMessage, maxBytes = DEFAULT_CONTROL_REQUEST_BODY_BYTES): Promise<string> {
-  const chunks: Buffer[] = []
+  const chunks: Uint8Array[] = []
   let size = 0
   for await (const chunk of request) {
     const value = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)

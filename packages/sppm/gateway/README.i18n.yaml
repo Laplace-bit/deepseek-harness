@@ -1,6 +1,37 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/sppm/gateway/README.md
-README.md: a799015430c2f292174cd7ff8420a8be4ca7a5e5
-README.zh.md: d05e64a4a9e4aa54ede554eafae424fd839c3fd6
+/:
+  en: 7bb8a1c9db1e90f7
+  zh: c637be5fe448677a
+/sppm-agent-gateway:
+  en: d3aee0ce05b522de
+  zh: 1ff39bb62e6f75c7
+/sppm-agent-gateway/summary:
+  en: b7a4471a4e9b68b1
+  zh: 829fc6ab7723f3ca
+/sppm-agent-gateway/table-of-contents:
+  en: 6c9867484e583166
+  zh: 2a507adc0c3c590e
+/sppm-agent-gateway/local-startup:
+  en: 7d54a13a6e9f93c6
+  zh: 485ce26c0b270ee9
+/sppm-agent-gateway/reverse-proxy-requirements-for-embedding:
+  en: c4a7acb1effb8fc8
+  zh: de255671e81ed77f
+/sppm-agent-gateway/deployment-and-workspace-placement:
+  en: 308c7855a693762c
+  zh: b8c6a15d55a1493b
+/sppm-agent-gateway/model-experience:
+  en: ee0e2218ef59bb4e
+  zh: a0b04126caa3c3b8
+/sppm-agent-gateway/model-experience/kv-cache-effect:
+  en: 0ee2215704997f25
+  zh: 46bb38d0f03efbd0
+/sppm-agent-gateway/known-limitations-and-deferred-work:
+  en: fc6a50cc930465c7
+  zh: af0eb9c78cbdbd2b
+/sppm-agent-gateway/known-limitations-and-deferred-work/dev-note:
+  en: 9d1f9a26e476e6b3
+  zh: 2c1d280733a88292

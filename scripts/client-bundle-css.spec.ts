@@ -10,8 +10,18 @@ import { clientBundle } from '../packages/client/tsdown.client.ts'
 
 interface CssPlugin {
   name: string
-  resolveId?: (source: string, importer?: string) => string | null
+  resolveId?: ResolveIdHook
   load?: (this: { addWatchFile(id: string): void }, id: string) => Promise<string | null>
+}
+
+type ResolveIdHook =
+  | ((source: string, importer?: string) => string | null)
+  | { order?: string; handler: (source: string, importer?: string) => string | null }
+
+function resolveCssId(plugin: CssPlugin, source: string, importer: string): string | null {
+  const hook = plugin.resolveId
+  if (hook === undefined) return null
+  return typeof hook === 'function' ? hook(source, importer) : hook.handler(source, importer)
 }
 
 function cssPlugin(name: 'dsh-css-modules-inline' | 'dsh-css-global-inline' | 'dsh-css-text-inline'): CssPlugin {
@@ -28,6 +38,15 @@ function cssPlugin(name: 'dsh-css-modules-inline' | 'dsh-css-global-inline' | 'd
 }
 
 describe('client bundle CSS Modules', () => {
+  it.each(['dsh-css-modules-inline', 'dsh-css-global-inline', 'dsh-css-text-inline'] as const)(
+    'claims %s before tsdown stylesheet resolution',
+    (name) => {
+      const hook = cssPlugin(name).resolveId
+      expect(typeof hook).toBe('object')
+      expect(hook).toMatchObject({ order: 'pre' })
+    },
+  )
+
   it('registers the source stylesheet as a watch dependency', async () => {
     const root = await mkdtemp(join(tmpdir(), 'dsh-client-css-watch-'))
     try {
@@ -35,7 +54,7 @@ describe('client bundle CSS Modules', () => {
       const importer = join(root, 'index.ts')
       await writeFile(stylesheet, '.root { color: red; }\n')
       const plugin = cssPlugin('dsh-css-modules-inline')
-      const virtualId = plugin.resolveId?.('./Fixture.module.css', importer)
+      const virtualId = resolveCssId(plugin, './Fixture.module.css', importer)
       if (typeof virtualId !== 'string' || plugin.load === undefined) {
         throw new Error('CSS Modules plugin hooks are incomplete')
       }
@@ -59,7 +78,7 @@ describe('client bundle global CSS', () => {
       const importer = join(root, 'index.ts')
       await writeFile(stylesheet, 'body { color: red; }\n')
       const plugin = cssPlugin('dsh-css-global-inline')
-      const virtualId = plugin.resolveId?.('./base.css', importer)
+      const virtualId = resolveCssId(plugin, './base.css', importer)
       if (typeof virtualId !== 'string' || plugin.load === undefined) {
         throw new Error('global CSS plugin hooks are incomplete')
       }
@@ -82,7 +101,7 @@ describe('client bundle global CSS', () => {
       const importer = join(root, 'index.ts')
       await writeFile(stylesheet, 'body { color: red; }\n')
       const plugin = cssPlugin('dsh-css-text-inline')
-      const virtualId = plugin.resolveId?.('./base.css?inline', importer)
+      const virtualId = resolveCssId(plugin, './base.css?inline', importer)
       if (typeof virtualId !== 'string' || plugin.load === undefined) {
         throw new Error('inline CSS plugin hooks are incomplete')
       }

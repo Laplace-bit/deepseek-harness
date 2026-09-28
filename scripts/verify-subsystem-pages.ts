@@ -19,6 +19,7 @@ export const GROUPS_WITHOUT_SUBSYSTEM_PAGE: Readonly<Record<string, string>> = {
   bundle: 'Composition patch carriers whose mounted packages own all runtime contracts.',
   hooks: 'External hook-protocol bridges over existing interception points, not a new Harness service.',
   sdk: 'Out-of-process protocol and client packages whose package READMEs own the SDK contracts.',
+  sppm: 'SPPM integration crosses Harness and Vue-owned business pages, so no single Harness subsystem page owns the family; the integration and page-bridge protocol docs own its shared contracts.',
   util: 'Low-level primitives whose business semantics remain with their consuming subsystems.',
 }
 

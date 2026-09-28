@@ -189,6 +189,10 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
   '@deepseek-ai/dsh-client-ui-theme': ['lib/styles'],
   // The physical-key protocol is a public entry usable without the browser service.
   '@deepseek-ai/dsh-client-shortcuts': ['lib/protocol.js'],
+  // The SPPM gateway carries its fixed Harness profile patch beside the package.
+  '@deepseek-ai/dsh-sppm-gateway': ['profile'],
+  '@deepseek-ai/dsh-sppm-harness-plugin': ['skills'],
+  '@deepseek-ai/dsh-sppm-ui-embed': ['lib/assistant.js', 'lib/style.css'],
   // The CPython side ships as source .py files, published as-is rather than built.
   '@deepseek-ai/dsh-experimental-ptc-runtime-python': ['py/**/*.py'],
   '@deepseek-ai/dsh-experimental-speech-to-text-sensevoice': ['runtime/assets.json'],

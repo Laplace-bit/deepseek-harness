@@ -133,7 +133,12 @@ describe('HarnessInstanceManager', () => {
       expect(upstreamHits).toBe(1)
     } finally {
       await gateway.close()
-      await new Promise<void>((resolve, reject) => { upstream.close(error => error === undefined ? resolve() : reject(error)) })
+      await new Promise<void>((resolve, reject) => {
+        upstream.close((error) => {
+          if (error === undefined) resolve()
+          else reject(error)
+        })
+      })
     }
   })
 
@@ -180,7 +185,12 @@ describe('HarnessInstanceManager', () => {
       expect(upstreamHits).toBe(0)
     } finally {
       await gateway.close()
-      await new Promise<void>((resolve, reject) => { upstream.close(error => error === undefined ? resolve() : reject(error)) })
+      await new Promise<void>((resolve, reject) => {
+        upstream.close((error) => {
+          if (error === undefined) resolve()
+          else reject(error)
+        })
+      })
     }
   })
 
@@ -204,7 +214,9 @@ describe('HarnessInstanceManager', () => {
     try {
       const response = await fetch(`http://127.0.0.1:${String(address.port)}/api/sppm/v1/capabilities`, { headers: { authorization: 'Bearer sp-token' } })
       expect(response.status).toBe(200)
-      await expect(response.json()).resolves.toMatchObject({ actions: expect.arrayContaining(['searchRoutes', 'navigateTo']) })
+      const payload = JSON.parse(await response.text()) as { actions: string[] }
+      expect(payload.actions).toContain('searchRoutes')
+      expect(payload.actions).toContain('navigateTo')
     } finally {
       await gateway.close()
     }

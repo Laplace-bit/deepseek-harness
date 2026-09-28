@@ -42,13 +42,19 @@
     "semver": "^7.8.5",
     "ws": "^8.21.0",
     "@deepseek-ai/dsh-api-gateway": "workspace:*",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@deepseek-ai/cordis": "workspace:~",
+    "@deepseek-ai/dsh-home-paths": "workspace:*",
+    "@deepseek-ai/dsh-deepseek-account": "workspace:*",
+    "@deepseek-ai/dsh-atomic-write": "workspace:*",
+    "@deepseek-ai/dsh-util-crypto": "workspace:*",
+    "@deepseek-ai/dsh-util-values": "workspace:*",
+    "@deepseek-ai/cordis-plugin-group": "workspace:~",
+    "@deepseek-ai/dsh-launch-environment": "workspace:*"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-app-boot": "workspace:*",
     "@deepseek-ai/dsh-client-ui-settings-general": "workspace:*",
     "@deepseek-ai/dsh-client-ui-sidebar-browser": "workspace:*",
-    "@deepseek-ai/dsh-home-paths": "workspace:*",
     "@deepseek-ai/node-addon-system": "workspace:~",
     "@electron/get": "^5.1.0",
     "@electron/notarize": "2.5.0",
@@ -65,7 +71,6 @@
     "pnpm": "11.7.0",
     "sharp": "^0.35.3",
     "typescript": "^6.0.3",
-    "@deepseek-ai/dsh-deepseek-account": "workspace:*",
     "@types/ws": "^8.18.1",
     "@deepseek-ai/dsh-client-ui-primitives": "workspace:*",
     "react": "^18.2.0",
@@ -74,7 +79,6 @@
     "@types/react-dom": "~18.3.0",
     "vite": "^6.0.0",
     "@deepseek-ai/dsh-client-ui-theme": "workspace:*",
-    "@deepseek-ai/dsh-client-shortcuts": "workspace:*",
-    "@deepseek-ai/dsh-atomic-write": "workspace:*"
+    "@deepseek-ai/dsh-client-shortcuts": "workspace:*"
   }
 }

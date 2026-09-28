@@ -211,20 +211,16 @@ describe('SPPM page action tools', () => {
       filters: { description: '记录筛选条件，支持时间、设备、工艺卡和参数条件' },
       limit: { type: 'integer' },
     })
-    expect(toolNamed(tools, 'sppm_fillForm').parameters.properties).toMatchObject({
-      formId: { description: expect.stringContaining('formId') },
-      formVersion: { description: expect.stringContaining('formVersion') },
-      values: { description: expect.stringContaining('process-card-header') },
-    })
-    expect(toolNamed(tools, 'sppm_validateDraft').parameters.properties).toMatchObject({
-      formId: { description: expect.stringContaining('顶层参数') },
-      formVersion: { description: expect.stringContaining('顶层参数') },
-      values: { description: expect.stringContaining('不得传 draft') },
-    })
+    const fillProperties = toolNamed(tools, 'sppm_fillForm').parameters.properties as Record<string, { description?: string }>
+    expect(fillProperties.formId?.description).toContain('formId')
+    expect(fillProperties.formVersion?.description).toContain('formVersion')
+    expect(fillProperties.values?.description).toContain('process-card-header')
+    const validationProperties = toolNamed(tools, 'sppm_validateDraft').parameters.properties as Record<string, { description?: string }>
+    expect(validationProperties.formId?.description).toContain('顶层参数')
+    expect(validationProperties.formVersion?.description).toContain('顶层参数')
+    expect(validationProperties.values?.description).toContain('不得传 draft')
     const businessProperties = toolNamed(tools, 'sppm_readBusinessContext').parameters.properties as Record<string, unknown>
-    expect(businessProperties.includeDraft).toMatchObject({
-      description: expect.stringContaining('默认只返回摘要'),
-    })
+    expect((businessProperties.includeDraft as { description?: string }).description).toContain('默认只返回摘要')
     await toolNamed(tools, 'sppm_queryRecords').execute({ filters: { deviceCode: 'D-1' }, limit: 120 }, execution())
     expect(requests[0]).toMatchObject({ action: 'queryRecords', args: { filters: { deviceCode: 'D-1' }, limit: 120 } })
   })

@@ -17,11 +17,13 @@ export const SPPM_PAGE_BRIDGE_ACTIONS = [
   'submitForm',
 ] as const
 
+/** Semantic page action supported by protocol version 1. */
 export type PageActionName = typeof SPPM_PAGE_BRIDGE_ACTIONS[number]
 
 /** Bumped whenever the browser page bridge wire contract changes. */
 export const SPPM_PAGE_BRIDGE_PROTOCOL_VERSION = 1
 
+/** Allowlisted snapshot of one registered page and its current capabilities. */
 export interface PageContext {
   /** The wire version emitted by the page adapter. */
   protocolVersion?: number
@@ -47,6 +49,7 @@ export interface PageContext {
   capabilities: PageActionName[]
 }
 
+/** Page-owned field metadata available for a supported form action. */
 export interface PageFieldDefinition {
   key: string
   label: string
@@ -58,6 +61,7 @@ export interface PageFieldDefinition {
   stageCode?: string | number
 }
 
+/** Current form identity and schema version exposed by a page adapter. */
 export interface PageFormDefinition {
   formId: string
   formVersion: number
@@ -70,6 +74,7 @@ export interface PageFormDefinition {
   objectId?: string | number
 }
 
+/** Versioned semantic command delivered to a registered page adapter. */
 export interface PageActionRequest {
   commandId: string
   userId: string
@@ -83,6 +88,7 @@ export interface PageActionRequest {
   expiresAt: number
 }
 
+/** Outcome state returned for a semantic page action. */
 export type PageActionReceiptState =
   | 'succeeded'
   | 'failed'
@@ -90,6 +96,7 @@ export type PageActionReceiptState =
   | 'cancelled'
   | 'expired'
 
+/** Structured result returned by a page adapter or transport. */
 export interface PageActionReceipt {
   commandId: string
   state: PageActionReceiptState
@@ -121,7 +128,10 @@ function isJsonRecord(value: unknown): value is Record<string, unknown> {
   return isRecord(value) && isJsonValue(value)
 }
 
-/** Validate a semantic request before it reaches a page adapter. */
+/** Validate a semantic request before it reaches a page adapter.
+ * @param value Untrusted value received from a transport or caller.
+ * @returns Whether the value satisfies the page-action request contract.
+ */
 export function isPageActionRequest(value: unknown): value is PageActionRequest {
   if (!isRecord(value)) return false
   if (typeof value.commandId !== 'string' || value.commandId.length === 0) return false
@@ -146,7 +156,10 @@ export function isPageActionRequest(value: unknown): value is PageActionRequest 
   return true
 }
 
-/** Validate a semantic receipt before it is returned to the Harness caller. */
+/** Validate a semantic receipt before it is returned to the Harness caller.
+ * @param value Untrusted value received from a page adapter or transport.
+ * @returns Whether the value satisfies the page-action receipt contract.
+ */
 export function isPageActionReceipt(value: unknown): value is PageActionReceipt {
   if (!isRecord(value)) return false
   if (typeof value.commandId !== 'string' || value.commandId.length === 0) return false
@@ -163,7 +176,10 @@ export function isPageActionReceipt(value: unknown): value is PageActionReceipt 
   return true
 }
 
-/** Validate the JSON fields required before a page context crosses the wire. */
+/** Validate the JSON fields required before a page context crosses the wire.
+ * @param value Untrusted value received from a page adapter or transport.
+ * @returns Whether the value satisfies the page-context contract.
+ */
 export function isPageContext(value: unknown): value is PageContext {
   if (!isRecord(value)) return false
   if (typeof value.browserInstanceId !== 'string' || value.browserInstanceId.length === 0) return false
@@ -196,6 +212,7 @@ export function isPageContext(value: unknown): value is PageContext {
   return true
 }
 
+/** Page-owned callbacks registered for one semantic capability set. */
 export interface PageCapabilityDefinition {
   pageId: string
   readContext: () => PageContext
@@ -204,6 +221,7 @@ export interface PageCapabilityDefinition {
   execute: (request: PageActionRequest) => Promise<PageActionReceipt>
 }
 
+/** Registers page adapters and dispatches validated semantic actions. */
 export interface PageCapabilityRegistry {
   register(definition: PageCapabilityDefinition): () => void
   read(pageId: string): PageContext | undefined
@@ -225,6 +243,8 @@ const GLOBAL_ACTIONS = new Set<PageActionName>(['searchRoutes', 'navigateTo'])
  * its live menu/router context and do not wait for a business form. Every other
  * action requires the registered target page, a matching browser instance, the
  * current context version, and the advertised capability.
+ * @param now Clock used to reject expired requests.
+ * @returns A registry that owns page registrations and command receipts.
  */
 export function createPageCapabilityRegistry(now: () => number = Date.now): PageCapabilityRegistry {
   const definitions = new Map<string, PageCapabilityDefinition>()
@@ -255,15 +275,16 @@ export function createPageCapabilityRegistry(now: () => number = Date.now): Page
       return definitions.get(pageId)?.readContext()
     },
 
-    async execute(request) {
-      if (!isPageActionRequest(request as unknown)) {
+    async execute(value: unknown) {
+      if (!isPageActionRequest(value)) {
         return {
-          commandId: typeof request?.commandId === 'string' ? request.commandId : '',
+          commandId: '',
           state: 'failed',
-          contextVersion: typeof request?.contextVersion === 'number' && Number.isInteger(request.contextVersion) ? request.contextVersion : -1,
+          contextVersion: -1,
           message: '页面指令格式无效',
         }
       }
+      const request = value
       if (seenCommands.has(request.commandId)) {
         return { commandId: request.commandId, state: 'failed', contextVersion: request.contextVersion, message: '指令已执行或正在执行' }
       }
@@ -279,14 +300,12 @@ export function createPageCapabilityRegistry(now: () => number = Date.now): Page
       }
       let context: PageContext
       try {
-        context = definition.readContext()
+        const value: unknown = definition.readContext()
+        if (!isPageContext(value)) throw new Error('页面上下文格式无效')
+        context = value
       } catch (error) {
         seenCommands.delete(request.commandId)
         return { commandId: request.commandId, state: 'failed', contextVersion: request.contextVersion, message: error instanceof Error ? error.message : '页面上下文读取失败' }
-      }
-      if (!isPageContext(context as unknown)) {
-        seenCommands.delete(request.commandId)
-        return { commandId: request.commandId, state: 'failed', contextVersion: request.contextVersion, message: '页面上下文格式无效' }
       }
       if (context.protocolVersion !== undefined && context.protocolVersion !== SPPM_PAGE_BRIDGE_PROTOCOL_VERSION) {
         return { commandId: request.commandId, state: 'failed', contextVersion: context.contextVersion, message: '页面桥接协议版本不匹配，请刷新页面', nextAction: '刷新 Web 页面并重新连接 Agent' }
@@ -294,8 +313,9 @@ export function createPageCapabilityRegistry(now: () => number = Date.now): Page
       if (!isGlobalAction && typeof definition.waitForReady === 'function') {
         try {
           await definition.waitForReady(request)
-          context = definition.readContext()
-          if (!isPageContext(context as unknown)) throw new Error('页面上下文格式无效')
+          const value: unknown = definition.readContext()
+          if (!isPageContext(value)) throw new Error('页面上下文格式无效')
+          context = value
         } catch (error) {
           seenCommands.delete(request.commandId)
           return { commandId: request.commandId, state: 'failed', contextVersion: context.contextVersion, message: error instanceof Error ? error.message : '页面业务依赖尚未就绪', nextAction: '等待页面加载完成后重新读取上下文' }
@@ -328,13 +348,13 @@ export function createPageCapabilityRegistry(now: () => number = Date.now): Page
       if (!isPageActionReceipt({
         ...receipt,
         commandId: request.commandId,
-        contextVersion: receipt.contextVersion ?? context.contextVersion,
+        contextVersion: receipt.contextVersion,
       })) {
         seenCommands.delete(request.commandId)
         return { commandId: request.commandId, state: 'failed', contextVersion: context.contextVersion, message: '页面返回了无效操作回执' }
       }
       if (!TERMINAL_STATES.has(receipt.state)) seenCommands.delete(request.commandId)
-      return { ...receipt, commandId: request.commandId, contextVersion: receipt.contextVersion ?? context.contextVersion }
+      return { ...receipt, commandId: request.commandId, contextVersion: receipt.contextVersion }
     },
 
     invalidate(pageId) {

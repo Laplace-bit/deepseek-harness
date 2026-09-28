@@ -47,6 +47,8 @@ try {
     process.env.SPPM_GATEWAY_COOKIE_SECRET = readFileSync(secretFile, 'utf8').trim()
     if (process.env.SPPM_GATEWAY_COOKIE_SECRET.length < 32) throw new Error('Local cookie-secret is invalid; configure SPPM_GATEWAY_COOKIE_SECRET explicitly.')
   }
+  const { syncSppmAssistantAssets } = await import('./sppm-assistant-assets.ts')
+  await syncSppmAssistantAssets()
   console.log(`SPPM local gateway: ${process.env.SPPM_GATEWAY_HOST}:${port}`)
   console.log(`Identity endpoint: ${identity.origin}${identity.pathname}`)
   console.log('Open the logged-in Vue page after the listening message. Ctrl+C stops this gateway and its Harness children.')

@@ -2932,6 +2932,31 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-spill-policy -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-sppm-harness-plugin -->
+<a id="deepseek-aidsh-sppm-harness-plugin"></a>
+
+## `@deepseek-ai/dsh-sppm-harness-plugin`
+
+- `inject`: `tools`
+- `refs`: [`PageActionReceipt`](../packages/sppm/page-bridge/src/index.ts) · [`PageActionRequest`](../packages/sppm/page-bridge/src/index.ts)
+- `source`: [`packages/sppm/harness-plugin/src/index.ts:22`](../packages/sppm/harness-plugin/src/index.ts)
+
+```ts config-catalog
+/** Configuration for the SPPM page-action tools. */
+export interface Config {
+  /** Replaces environment-based HTTP delivery with an injected transport. */
+  transport?: PageActionTransport
+}
+
+/** Sends semantic page actions and resolves the active browser context. */
+export interface PageActionTransport {
+  execute(request: PageActionRequest): Promise<PageActionReceipt>
+  /** Read the page context of the active browser instance, optionally pinned to one instance. */
+  resolveContext(request: { browserInstanceId?: string }): Promise<PageActionReceipt>
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-sppm-harness-plugin -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-ssh -->
 <a id="deepseek-aidsh-ssh"></a>
 
@@ -4453,6 +4478,9 @@ Imported as libraries by other packages; a `cordis.yml` cannot load them.
 | `@deepseek-ai/dsh-session-snapshot` | — | [`packages/test-support/session-snapshot/src/index.ts`](../packages/test-support/session-snapshot/src/index.ts) |
 | `@deepseek-ai/dsh-session-telemetry` | — | [`packages/session/session-telemetry/src/index.ts`](../packages/session/session-telemetry/src/index.ts) |
 | `@deepseek-ai/dsh-session-title-llm` | — | [`packages/session/session-title-llm/src/index.ts`](../packages/session/session-title-llm/src/index.ts) |
+| `@deepseek-ai/dsh-sppm-gateway` | — | [`packages/sppm/gateway/src/index.ts`](../packages/sppm/gateway/src/index.ts) |
+| `@deepseek-ai/dsh-sppm-page-bridge` | — | [`packages/sppm/page-bridge/src/index.ts`](../packages/sppm/page-bridge/src/index.ts) |
+| `@deepseek-ai/dsh-sppm-ui-embed` | — | [`packages/sppm/ui-embed/src/index.ts`](../packages/sppm/ui-embed/src/index.ts) |
 | `@deepseek-ai/dsh-subagent-in-process-driver` | — | [`packages/subagent/subagent-in-process-driver/src/index.ts`](../packages/subagent/subagent-in-process-driver/src/index.ts) |
 | `@deepseek-ai/dsh-timeout` | — | [`packages/util/timeout/src/index.ts`](../packages/util/timeout/src/index.ts) |
 | `@deepseek-ai/dsh-typert-generator` | — | [`packages/typert/generator/src/index.ts`](../packages/typert/generator/src/index.ts) |

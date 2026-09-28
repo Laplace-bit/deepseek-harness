@@ -1,0 +1,25 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/sppm/README.md
+/:
+  en: 64c898ba36e6df8a
+  zh: 9f6ec628093e358a
+/sppm-process-parameter-management-integration:
+  en: bbb53ee8134687cb
+  zh: 1fe4f5aafe349e68
+/sppm-process-parameter-management-integration/summary:
+  en: 11511eaedd968225
+  zh: 75fb7a53ebd41964
+/sppm-process-parameter-management-integration/table-of-contents:
+  en: 1eb35b015a6c423f
+  zh: a8a3dceee2c9e943
+/sppm-process-parameter-management-integration/packages:
+  en: 6eb1d59abe21aae7
+  zh: 646a39a13f4c0ae1
+/sppm-process-parameter-management-integration/related-documentation:
+  en: 8a4076032bfd021b
+  zh: 11706c747f08d535
+/sppm-process-parameter-management-integration/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

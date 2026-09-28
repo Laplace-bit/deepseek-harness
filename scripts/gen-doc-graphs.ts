@@ -511,6 +511,14 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Registers capabilities, owns PTC mode transport, and routes calls through pre-policy, monotonic guards, around dispatch, post-policy, and final-result observation.',
   },
   {
+    key: 'sppmPageActions',
+    pkg: 'sppm-harness-plugin',
+    title: 'SPPM semantic page-action bridge',
+    mode: 'seam',
+    consumers: ['sppm-harness-plugin'],
+    note: 'Routes SPPM business-page tools through the versioned page-bridge protocol; the wire contract is owned by docs/sppm-page-bridge-protocol.md.',
+  },
+  {
     key: 'userQuestions',
     pkg: 'user-questions',
     title: 'Human question/answer seam',

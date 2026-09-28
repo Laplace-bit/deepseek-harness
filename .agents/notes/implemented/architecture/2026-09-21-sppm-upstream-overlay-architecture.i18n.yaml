@@ -1,6 +1,22 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-21-sppm-upstream-overlay-architecture.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-21-sppm-upstream-overlay-architecture.md
-2026-09-21-sppm-upstream-overlay-architecture.md: 18367d86dd2fa28773bc10f2f28829eaae87aaa5
-2026-09-21-sppm-upstream-overlay-architecture.zh.md: 4c44f5ac690832dcee386430de7dc0d6e0cf1a4f
+/agent-note-sppm-upstream-overlay-architecture:
+  en: 3ae1bf1e7012d70d
+  zh: 6a68b3e2685845a0
+/agent-note-sppm-upstream-overlay-architecture/problem:
+  en: a992d3a5bc2ce192
+  zh: cb9bf8bf59d84eb5
+/agent-note-sppm-upstream-overlay-architecture/decision:
+  en: 78e763953264a2cd
+  zh: 605293490889fc9e
+/agent-note-sppm-upstream-overlay-architecture/update-workflow:
+  en: 02d2f221f1a6c50d
+  zh: 5ac2fc5a3fceef14
+/agent-note-sppm-upstream-overlay-architecture/alternatives-considered:
+  en: 71f89c239ca2583c
+  zh: a72891e504685339
+/agent-note-sppm-upstream-overlay-architecture/consequences:
+  en: bbb722c1753eea14
+  zh: 769e89a025829cdc

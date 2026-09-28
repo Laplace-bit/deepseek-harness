@@ -172,10 +172,6 @@
     "apps/desktop/scripts/**/*.ts",
     "apps/desktop/tests/**/*.ts",
     "apps/desktop-host/tests/**/*.ts",
-    // SPPM host-face packages; ui-embed belongs to the Client aggregate.
-    "packages/sppm/gateway/src/**/*.ts",
-    "packages/sppm/page-bridge/src/**/*.ts",
-    "packages/sppm/harness-plugin/src/**/*.ts",
     "benchmarks/**/*.ts",
     "packages/*/*/tests/**/*.ts",
     "scripts/**/*.ts",
@@ -215,6 +211,10 @@
 
     { "path": "./packages/host/product-telemetry-otel" },
     { "path": "./packages/boot/config-editor" },
+    { "path": "./packages/sppm/page-bridge" },
+    { "path": "./packages/sppm/gateway" },
+    { "path": "./packages/sppm/harness-plugin" },
+    { "path": "./packages/sppm/ui-embed" },
     { "path": "./packages/client/connection/tsconfig.host.json" },
     { "path": "./packages/skill/skill-office" },
     { "path": "./packages/skill/tool-workspace-dependencies" },

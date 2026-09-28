@@ -1,6 +1,37 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/sppm/harness-plugin/README.md
-README.md: 8d0c40ec20e8e814fab650c2e78ce083ead3b34f
-README.zh.md: 1484d27c35ea004c3a4f36fb298be8608ae6f8ce
+/:
+  en: 45cb798134cf75e0
+  zh: 1de32131e4009bcf
+/sppm-harness-plugin:
+  en: b7146dae51423c19
+  zh: f9953a93e251ffa5
+/sppm-harness-plugin/summary:
+  en: abf45f64648cfb08
+  zh: 7ff0f6035933e9c1
+/sppm-harness-plugin/table-of-contents:
+  en: 00d12996e93da1ed
+  zh: deeb375150718451
+/sppm-harness-plugin/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/sppm-harness-plugin/model-experience/sppm-page-action-calls:
+  en: 0fcb7c9dde41cca4
+  zh: 035a94a6314aeb64
+/sppm-harness-plugin/model-experience/sppm-page-action-calls/what-the-model-sees:
+  en: 387bc934a1cda3d1
+  zh: a51289146ae88b59
+/sppm-harness-plugin/model-experience/sppm-page-action-calls/token-effect:
+  en: dec52dfaf157eb02
+  zh: 4b6e88990c757550
+/sppm-harness-plugin/model-experience/sppm-page-action-calls/kv-cache-effect:
+  en: 0a8703f751927db2
+  zh: f7b2562c77194163
+/sppm-harness-plugin/known-limitations-and-deferred-work:
+  en: 38069f3fad5735e8
+  zh: a8776468077f022e
+/sppm-harness-plugin/known-limitations-and-deferred-work/dev-note:
+  en: 084234a9636b5b74
+  zh: abad340286d20d23

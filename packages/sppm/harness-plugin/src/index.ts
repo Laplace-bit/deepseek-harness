@@ -3,13 +3,24 @@ import { randomUUID } from 'node:crypto'
 import { defineTool, type ToolExecution } from '@deepseek-ai/dsh-tools'
 import { isPageActionReceipt, isPageContext, SPPM_PAGE_BRIDGE_ACTIONS, type PageActionName, type PageActionReceipt, type PageActionRequest, type PageContext } from '@deepseek-ai/dsh-sppm-page-bridge'
 
+type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue }
+
+function cloneToolValue(value: unknown): JsonValue {
+  const serialized: unknown = JSON.stringify(value)
+  if (typeof serialized !== 'string') throw new TypeError('SPPM tool result must be JSON serializable')
+  return JSON.parse(serialized) as JsonValue
+}
+
+/** Sends semantic page actions and resolves the active browser context. */
 export interface PageActionTransport {
   execute(request: PageActionRequest): Promise<PageActionReceipt>
   /** Read the page context of the active browser instance, optionally pinned to one instance. */
   resolveContext(request: { browserInstanceId?: string }): Promise<PageActionReceipt>
 }
 
+/** Configuration for the SPPM page-action tools. */
 export interface Config {
+  /** Replaces environment-based HTTP delivery with an injected transport. */
   transport?: PageActionTransport
 }
 
@@ -212,7 +223,7 @@ export function apply(ctx: Context, config: Config = {}): void {
         return {
           commandId,
           state: resolution.state === 'expired' ? 'expired' : 'failed',
-          contextVersion: resolution.contextVersion ?? contextVersion,
+          contextVersion: resolution.contextVersion,
           message: resolution.message ?? '无法解析当前页面',
           nextAction: resolution.state === 'expired' ? '页面发现已超时，重新读取当前页面后重试' : '打开目标业务页面或关闭多余标签页后重试',
         }
@@ -328,7 +339,7 @@ export function apply(ctx: Context, config: Config = {}): void {
         ...actionParameters[action],
       },
       output,
-      execute: async (args, exec) => JSON.parse(JSON.stringify(await execute(action, isRecord(args) ? args : {}, exec))),
+      execute: async (args, exec) => cloneToolValue(await execute(action, isRecord(args) ? args : {}, exec)),
     }))
   }
 }

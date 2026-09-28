@@ -546,10 +546,17 @@ function clientConfig(id: string, entry: string, clientBanner?: (fileName: strin
       },
     }, tscSourceMapPlugin(), asyncChunkRequirePlugin(), isolation.plugin, {
       name: 'dsh-css-modules-inline',
-      resolveId(source: string, importer: string | undefined) {
-        if (!source.endsWith('.module.css')) return null
-        const abs = importer !== undefined ? sourceAssetPath(source, importer) : source
-        return CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
+      resolveId: {
+        // Claim stylesheet imports before tsdown's own CSS resolver. Otherwise
+        // it rewrites the query-bearing id into a JavaScript-looking virtual
+        // path (for example `.css.mjs?inline`) and the global CSS hook below
+        // tries to read that path from disk.
+        order: 'pre' as const,
+        handler(source: string, importer: string | undefined) {
+          if (!source.endsWith('.module.css')) return null
+          const abs = importer !== undefined ? sourceAssetPath(source, importer) : source
+          return CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
+        },
       },
       async load(virtualId: string) {
         if (!virtualId.startsWith(CSS_VIRTUAL_PREFIX)) return null
@@ -571,11 +578,14 @@ function clientConfig(id: string, entry: string, clientBanner?: (fileName: strin
       },
     }, {
       name: 'dsh-css-text-inline',
-      resolveId(source: string, importer: string | undefined) {
-        if (!source.endsWith(`.css${INLINE_CSS_QUERY}`)) return null
-        const stylesheet = source.slice(0, -INLINE_CSS_QUERY.length)
-        const abs = importer !== undefined ? sourceAssetPath(stylesheet, importer) : stylesheet
-        return INLINE_CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
+      resolveId: {
+        order: 'pre' as const,
+        handler(source: string, importer: string | undefined) {
+          if (!source.endsWith(`.css${INLINE_CSS_QUERY}`)) return null
+          const stylesheet = source.slice(0, -INLINE_CSS_QUERY.length)
+          const abs = importer !== undefined ? sourceAssetPath(stylesheet, importer) : stylesheet
+          return INLINE_CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
+        },
       },
       async load(virtualId: string) {
         if (!virtualId.startsWith(INLINE_CSS_VIRTUAL_PREFIX)) return null
@@ -587,10 +597,13 @@ function clientConfig(id: string, entry: string, clientBanner?: (fileName: strin
       },
     }, {
       name: 'dsh-css-global-inline',
-      resolveId(source: string, importer: string | undefined) {
-        if (!source.endsWith('.css') || source.endsWith('.module.css')) return null
-        const abs = importer !== undefined ? sourceAssetPath(source, importer) : source
-        return GLOBAL_CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
+      resolveId: {
+        order: 'pre' as const,
+        handler(source: string, importer: string | undefined) {
+          if (!source.endsWith('.css') || source.endsWith('.module.css')) return null
+          const abs = importer !== undefined ? sourceAssetPath(source, importer) : source
+          return GLOBAL_CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
+        },
       },
       async load(virtualId: string) {
         if (!virtualId.startsWith(GLOBAL_CSS_VIRTUAL_PREFIX)) return null

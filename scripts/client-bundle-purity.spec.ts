@@ -14,8 +14,18 @@ type ResolveId = (source: string) => null | { id: string; external: boolean }
 
 interface CssModulePlugin {
   name: string
-  resolveId?: (source: string, importer: string | undefined) => null | string
+  resolveId?: ResolveIdHook
   load?: (this: { addWatchFile: (id: string) => void }, id: string) => Promise<unknown>
+}
+
+type ResolveIdHook =
+  | ((source: string, importer: string | undefined) => null | string)
+  | { order?: string; handler: (source: string, importer: string | undefined) => null | string }
+
+function resolveCssId(plugin: CssModulePlugin, source: string, importer: string): string | null {
+  const hook = plugin.resolveId
+  if (hook === undefined) return null
+  return typeof hook === 'function' ? hook(source, importer) : hook.handler(source, importer)
 }
 
 interface SourceMapPlugin {
@@ -464,7 +474,7 @@ describe('client bundle CSS Modules watch graph', () => {
       '../packages/client/ui-conversation/src/client/queue/QueueDock.module.css',
       import.meta.url,
     ))
-    const virtualId = plugin.resolveId?.('./QueueDock.module.css', importer)
+    const virtualId = resolveCssId(plugin, './QueueDock.module.css', importer)
     if (virtualId === null || virtualId === undefined) throw new Error('CSS Modules import was not resolved')
     const addWatchFile = vi.fn()
 

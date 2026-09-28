@@ -1,6 +1,10 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for sppm-integration.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/sppm-integration.md
-sppm-integration.md: 379f9756f17e8c3b5f58c102a432011765579817
-sppm-integration.zh.md: bdd8f9ed8b9166131b5fd90319e810de60cc2ec3
+/sppm-integration-boundary:
+  en: e8612f4999a0c2c6
+  zh: 76fa0cb5e7eafc85
+/sppm-integration-boundary/deployment-and-workspace-placement:
+  en: 2882ebf73ff1a913
+  zh: 84772a6844134715

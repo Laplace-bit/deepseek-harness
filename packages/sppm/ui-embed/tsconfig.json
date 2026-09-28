@@ -1,12 +1,12 @@
 {
   "extends": "../../../tsconfig.base.client.json",
   "compilerOptions": {
-    "rootDir": "../..",
-    "outDir": "lib/types",
-    "noEmit": true,
-    "paths": {
-      "@deepseek-ai/dsh-sppm-page-bridge": ["../page-bridge/src/index.ts"]
-    }
+    "rootDir": "src",
+    "outDir": "lib/types"
   },
-  "include": ["src", "../page-bridge/src"]
+  "include": ["src"],
+  "references": [
+    { "path": "../../client/web" },
+    { "path": "../page-bridge" }
+  ]
 }

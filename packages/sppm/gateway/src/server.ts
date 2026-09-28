@@ -13,7 +13,7 @@ const instanceRoot = process.env.SPPM_INSTANCE_ROOT
 const harnessEntry = process.env.SPPM_HARNESS_ENTRY
 if (harnessEntry === undefined || harnessEntry.trim() === '') throw new Error('SPPM_HARNESS_ENTRY must point to the pinned Harness entry')
 const authIntrospectionUrl = process.env.SPPM_AUTH_INTROSPECTION_URL
-const sppmProfilePatch = new URL('../../profile/cordis.patch.yml', import.meta.url).pathname
+const sppmProfilePatch = new URL('../profile/cordis.patch.yml', import.meta.url).pathname
 // Instances run from their private DSH_HOME, so a bare `tsx/esm` specifier
 // would be resolved against that directory and the child would exit before it
 // can announce the Harness URL. Resolve the loader from this fixed install.
@@ -28,6 +28,7 @@ if (!Number.isSafeInteger(maxHarnessRequestBodyBytes) || maxHarnessRequestBodyBy
 const HARNESS_READY_TIMEOUT_MS = 90_000
 const children = new Set<ChildProcess>()
 let shuttingDown = false
+function isShuttingDown(): boolean { return shuttingDown }
 
 async function stopChild(child: ChildProcess): Promise<void> {
   if (child.exitCode !== null || child.signalCode !== null || child.pid === undefined) return
@@ -82,10 +83,10 @@ function redactHarnessOutput(value: string): string {
 async function waitForHarnessCookie(child: ChildProcess, port: number): Promise<string> {
   let output = ''
   let launchSeen = false
-  let settled = false
+  const resultState = { settled: false }
   const append = (chunk: Buffer | string): void => {
     output = `${output}${String(chunk)}`.slice(-32_000)
-    if (settled || launchSeen) return
+    if (resultState.settled || launchSeen) return
     const match = /dsh web:\s+(http:\/\/127\.0\.0\.1:\d+\/\?token=[^\s)]+)/u.exec(output)
     if (match?.[1] === undefined) return
     let launch: URL
@@ -105,15 +106,15 @@ async function waitForHarnessCookie(child: ChildProcess, port: number): Promise<
         const setCookie = exchange.headers.get('set-cookie')
         const cookie = setCookie?.split(';', 1)[0]?.trim()
         if (cookie === undefined || cookie.length < 1) throw new Error('Harness browser authentication did not set a cookie')
-        if (settled) return
-        settled = true
+        if (resultState.settled) return
+        resultState.settled = true
         clearTimeout(timer)
         child.stdout?.off('data', append)
         child.stderr?.off('data', append)
         resolveCookie?.(cookie)
       } catch (error) {
-        if (settled) return
-        settled = true
+        if (resultState.settled) return
+        resultState.settled = true
         clearTimeout(timer)
         child.stdout?.off('data', append)
         child.stderr?.off('data', append)
@@ -129,8 +130,8 @@ async function waitForHarnessCookie(child: ChildProcess, port: number): Promise<
     rejectCookie = reject
   })
   const fail = (error: Error): void => {
-    if (settled) return
-    settled = true
+    if (resultState.settled) return
+    resultState.settled = true
     clearTimeout(timer)
     child.stdout?.off('data', append)
     child.stderr?.off('data', append)
@@ -149,12 +150,12 @@ async function waitForHarnessCookie(child: ChildProcess, port: number): Promise<
 }
 
 const factory: HarnessInstanceFactory = async (principal): Promise<ManagedHarnessInstance> => {
-  if (shuttingDown) throw new Error('SPPM gateway is shutting down')
+  if (isShuttingDown()) throw new Error('SPPM gateway is shutting down')
   const safeUser = principal.userId.replace(/[^a-zA-Z0-9_-]/g, '_')
   const dataDirectory = join(instanceRoot, safeUser)
   await mkdir(dataDirectory, { recursive: true, mode: 0o700 })
   await installSppmDefaultSkills(dataDirectory)
-  if (shuttingDown) throw new Error('SPPM gateway is shutting down')
+  if (isShuttingDown()) throw new Error('SPPM gateway is shutting down')
   const port = 3400 + Math.floor(Math.random() * 1000)
   const internalToken = randomUUID()
   const child = spawn(process.execPath, [
@@ -186,7 +187,7 @@ const factory: HarnessInstanceFactory = async (principal): Promise<ManagedHarnes
   child.once('error', () => { if (child.pid === undefined) children.delete(child) })
   try {
     const harnessCookie = await waitForHarnessCookie(child, port)
-    if (shuttingDown) throw new Error('SPPM gateway is shutting down')
+    if (isShuttingDown()) throw new Error('SPPM gateway is shutting down')
     return {
       userId: principal.userId,
       instanceId: `harness-${safeUser}-${child.pid ?? Date.now()}`,
@@ -229,7 +230,7 @@ const gateway = new SppmGateway(gatewayConfig)
 if (!process.env.SPPM_GATEWAY_COOKIE_SECRET) throw new Error('SPPM_GATEWAY_COOKIE_SECRET must be configured')
 await gateway.listen()
 async function shutdown(): Promise<void> {
-  if (shuttingDown) return
+  if (isShuttingDown()) return
   shuttingDown = true
   const deadline = setTimeout(() => {
     for (const child of children) child.kill('SIGKILL')

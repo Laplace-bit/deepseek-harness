@@ -1,6 +1,28 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/sppm/page-bridge/README.md
-README.md: bfd4964fa7d0fe4fc3e40e3c06df944af41c4512
-README.zh.md: ec8b0cd1c552bfed64b89042050c6e5c71202a3f
+/:
+  en: d784f86c299f29e0
+  zh: 1450694d60c4b0f1
+/sppm-page-bridge:
+  en: ae50692098687427
+  zh: dc650dffd30a4796
+/sppm-page-bridge/summary:
+  en: b027d374c6441988
+  zh: 6870bc921415dd8e
+/sppm-page-bridge/table-of-contents:
+  en: 50bfa415c601a496
+  zh: 9693897b4bf6aab3
+/sppm-page-bridge/model-experience:
+  en: 12f3261756f722fd
+  zh: 6b718c4bfb0fd70e
+/sppm-page-bridge/model-experience/kv-cache-effect:
+  en: 8ce85fa9ab89ee25
+  zh: 8d55a477cf81cf90
+/sppm-page-bridge/known-limitations-and-deferred-work:
+  en: 0e6880573a726273
+  zh: 6f1fec85ff80b214
+/sppm-page-bridge/known-limitations-and-deferred-work/dev-note:
+  en: 3cebd4ffb54e1615
+  zh: 05cbc5c0449e5c2c

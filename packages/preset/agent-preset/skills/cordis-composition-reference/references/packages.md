@@ -407,6 +407,12 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-spill-local` | yes | Local-filesystem implementation of the DeepSeek Harness spill storage seam (private session-scoped files) |
 | `@deepseek-ai/dsh-spill-policy` | yes | Token-budgeted tool-result retention with recoverable text and image paths |
 
+## sppm
+
+| Package | Config | Description |
+|---|---|---|
+| `@deepseek-ai/dsh-sppm-harness-plugin` | yes | Cordis tools for operating SPPM business pages through the semantic page bridge |
+
 ## ssh
 
 | Package | Config | Description |

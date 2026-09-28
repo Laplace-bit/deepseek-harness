@@ -501,6 +501,30 @@ The full presentation field docs live in [`packages/core/tools/src/presentation.
 
 Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — the language sides differ only in locale-specific paired document paths. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
 
+<a id="ctxsppmpageactions--sppmpageactionservice"></a>
+
+### `ctx.sppmPageActions` — `SppmPageActionService`
+
+Cordis service exposed to SPPM tools; it has no arbitrary script surface.
+
+```ts cordis-catalog
+/**
+ * Run one page action in the browser.
+ * @param request - page-bound action command.
+ * @returns the browser receipt.
+ */
+execute(request: PageActionRequest): Promise<PageActionReceipt>
+
+/**
+ * Read the page context of the active browser instance.
+ * @param request - optional browser instance to pin resolution to.
+ * @returns a receipt whose `data.context` is the resolved page context.
+ */
+resolveContext(request: { browserInstanceId?: string }): Promise<PageActionReceipt>
+```
+
+Source: [`packages/sppm/harness-plugin/src/index.ts`](../../packages/sppm/harness-plugin/src/index.ts)
+
 <a id="ctxtools--toolruntime"></a>
 
 ### `ctx.tools` — `ToolRuntime`

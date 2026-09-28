@@ -22,6 +22,8 @@ const SKILL_SOURCE_LOCATIONS = SPPM_DEFAULT_SKILLS.map(name => ({
  * the file there means SPPM uses the same parser, watcher, validation and
  * model-facing loader as every other Harness skill. Installation is atomic and
  * idempotent so a partially written file can never be discovered.
+ * @param dshHome Harness user root that owns the `skills` directory.
+ * @returns Paths of the installed skill files.
  */
 export async function installSppmDefaultSkills(dshHome: string): Promise<readonly string[]> {
   const installed: string[] = []

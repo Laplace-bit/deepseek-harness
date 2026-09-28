@@ -748,6 +748,11 @@ const requiredStartupEntryIds = new Set<string>([
   'webserver',
   'modules',
   'connection',
+  // Remote contracts are part of the application transport boundary. If the
+  // Typert loader fails, letting the Web surface continue would leave a
+  // half-live Gateway that answers endpoint calls with withdrawn-definition
+  // errors instead of reporting startup failure.
+  'typert-loader',
   'headless-runner',
   'acp',
   'sdk-jsonrpc-server',

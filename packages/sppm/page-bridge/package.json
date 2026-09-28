@@ -1,20 +1,39 @@
 {
   "name": "@deepseek-ai/dsh-sppm-page-bridge",
-  "version": "0.1.0",
-  "private": true,
+  "description": "Versioned semantic page-action contract shared by the SPPM web host and Harness tools",
+  "version": "0.1.6-alpha.2",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "directory": "packages/sppm/page-bridge"
+  },
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
     },
-    "./src/*": "./src/*"
+    "./package.json": "./package.json"
   },
+  "files": [
+    "lib/index.js",
+    "lib/types/**/*.d.ts"
+  ],
   "scripts": {
+    "bundle": "tsdown",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run tests"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "workspace:^"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "workspace:^"
+  }
 }

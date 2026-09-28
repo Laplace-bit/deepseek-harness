@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+
 import { defineConfig } from 'tsdown'
 import { typertPlugin } from './packages/typert/generator/lib/types/tsdown-plugin.js'
 
@@ -18,11 +20,19 @@ function isBuildFaceClient(value: unknown): boolean {
  */
 export default defineConfig(({ env }) => {
   const client = isBuildFaceClient(env?.DSH_BUILD_FACE)
+  // The repository root owns the workspace package manifest but has no
+  // runtime `src/` package of its own. tsdown still loads this config as one
+  // workspace target, so do not hand it a glob that cannot exist on a fresh
+  // checkout. Package workspaces below are the real build targets; their
+  // Host tsc output is what the Typert pass consumes.
+  const rootHostEntry = existsSync(new URL('./lib/types/index.js', import.meta.url))
+    ? ['lib/types/{index,invariant,startup}.js']
+    : ''
   return {
     workspace: client
       ? ['vendor/*', 'packages/*/*', 'apps/cli']
       : ['vendor/*', 'packages/*/*', 'apps/cli', 'apps/desktop-host'],
-    entry: client ? '' : ['lib/types/{index,invariant,startup}.js'],
+    entry: client ? '' : rootHostEntry,
     outDir: 'lib',
     format: ['esm'],
     platform: 'node',

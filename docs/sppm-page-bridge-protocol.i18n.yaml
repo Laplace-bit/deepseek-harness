@@ -1,6 +1,37 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for sppm-page-bridge-protocol.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/sppm-page-bridge-protocol.md
-sppm-page-bridge-protocol.md: 77eecdab99b912837de32b4729b66f19bfeea96a
-sppm-page-bridge-protocol.zh.md: c89ad5d95578f1751b93f3457333d5c06e451ed2
+/:
+  en: 0fd5dd4ed9936e96
+  zh: 4051692bbbbc8203
+/sppm-page-bridge-protocol:
+  en: ede187ff88f22597
+  zh: 206aba4339f98223
+/sppm-page-bridge-protocol/scope:
+  en: 4cf7f9cbe56891ba
+  zh: 7c226514feffae9a
+/sppm-page-bridge-protocol/version-and-message-rules:
+  en: 2d2aa86ccc6c1d90
+  zh: f4fc420140945909
+/sppm-page-bridge-protocol/page-context:
+  en: 7f7edc276b39f11d
+  zh: ff0bf76329fdf652
+/sppm-page-bridge-protocol/requests:
+  en: c6fa30cea9191fe6
+  zh: 83b95dacced04373
+/sppm-page-bridge-protocol/receipts:
+  en: 67a61352dde7f6ad
+  zh: 04da0af8e2393bc4
+/sppm-page-bridge-protocol/action-classes:
+  en: dd661119cf9a1577
+  zh: 2c3361115bac9159
+/sppm-page-bridge-protocol/targeting-and-readiness:
+  en: 1392d6587fb293d5
+  zh: 38fc105ff9e91fe5
+/sppm-page-bridge-protocol/data-and-security-rules:
+  en: 2acdc3088e78aab2
+  zh: cd8969b14e61b0ac
+/sppm-page-bridge-protocol/conformance:
+  en: ca59b719fa683146
+  zh: 2a2e886e6d67fbf1

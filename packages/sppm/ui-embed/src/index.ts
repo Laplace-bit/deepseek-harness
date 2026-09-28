@@ -8,6 +8,7 @@ declare global {
   }
 }
 
+/** Host values and callbacks required to mount the embedded Harness client. */
 export interface AssistantOptions {
   locale: 'zh-CN' | 'en' | 'vi'
   theme?: 'light' | 'dark' | 'system'
@@ -19,6 +20,7 @@ export interface AssistantOptions {
   }
 }
 
+/** Controls and disposes one embedded Harness client instance. */
 export interface AssistantHandle {
   show(): void
   hide(): void
@@ -51,12 +53,12 @@ function loadBootstrapScript(runtimeBase: string, element: HTMLScriptElement): P
     script.src = runtimeUrl(runtimeBase, source)
     script.async = false
     return new Promise((resolve, reject) => {
-      script.addEventListener('load', () => resolve(), { once: true })
-      script.addEventListener('error', () => reject(new Error(`Harness bootstrap script failed: ${source}`)), { once: true })
+      script.addEventListener('load', () => { resolve() }, { once: true })
+      script.addEventListener('error', () => { reject(new Error(`Harness bootstrap script failed: ${source}`)) }, { once: true })
       document.head.append(script)
     })
   }
-  script.textContent = element.textContent ?? ''
+  script.textContent = element.textContent
   document.head.append(script)
   script.remove()
   return Promise.resolve()
@@ -94,6 +96,9 @@ async function ensureHarnessBootstrap(runtimeBase: string): Promise<void> {
  * Mount the pinned Harness React application directly into a Vue-owned DOM
  * node. Harness still owns its HTTP RPC/WebSocket connection and React tree;
  * Vue only controls the surrounding window and page bridge.
+ * @param container Vue-owned DOM node that receives the assistant.
+ * @param options Gateway, browser, locale, and optional page-bridge settings.
+ * @returns Controls for the mounted assistant.
  */
 export async function mountAssistant(container: HTMLElement, options: AssistantOptions): Promise<AssistantHandle> {
   const mountPoint = document.createElement('div')
@@ -107,7 +112,7 @@ export async function mountAssistant(container: HTMLElement, options: AssistantO
   const runtimeBase = `${options.gatewayUrl.replace(/\/$/u, '')}/runtime`
   await ensureHarnessBootstrap(runtimeBase)
   const entry = new AppWebEntry(mountPoint, {
-    loadBundle: (resource: string) => new Promise((resolve, reject) => {
+    loadBundle: (resource: string) => new Promise<void>((resolve, reject) => {
       const script = document.createElement('script')
       script.async = true
       script.src = runtimeUrl(runtimeBase, resource)
@@ -139,7 +144,10 @@ export async function mountAssistant(container: HTMLElement, options: AssistantO
   }
 }
 
-/** Read options for SPPM plugins that need to configure the gateway transport. */
+/** Read options for SPPM plugins that need to configure the gateway transport.
+ * @param container Container passed to {@link mountAssistant}.
+ * @returns The mount options, or undefined when the container is not mounted.
+ */
 export function getAssistantOptions(container: HTMLElement): AssistantOptions | undefined {
   return optionsByContainer.get(container)
 }
